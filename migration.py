@@ -50,7 +50,7 @@ class SucTask():
             self.data[value] = ""
 
     def __str__(self):
-        return str(self.data)
+        return "\n".join(["   %s : %s" % (item[0], item[1]) for item in self.data.items()])
 
 class FaiTask():
     def __init__(self):
@@ -59,7 +59,7 @@ class FaiTask():
             self.data[value] = ""
 
     def __str__(self):
-        return str(self.data)
+        return "\n".join(["   %s : %s" % (item[0], item[1]) for item in self.data.items()])
 
 class JobSet:
     def __init__(self):
@@ -69,6 +69,7 @@ class JobSet:
 
     def __str__(self):
         content = "Total Task: %d\n" % len(self.tasks)
+        content += "StartTime: %s\nEndTime: %s\n" % (self.start, self.end)
         content += "\n".join([str(task) for task in self.tasks])
         return content
 
@@ -85,7 +86,6 @@ def extractJobSetFromReport(reportPath):
     successArea = bigAreas[2]
     failureArea = bigAreas[3]
 
-    """
     # For summaryArea
     subAreas = summaryArea.xpath("./td/table/tr")
     startTime = subAreas[1].xpath(".//span")[1].text
@@ -101,6 +101,7 @@ def extractJobSetFromReport(reportPath):
         properties = task.xpath("./td")
         if len(properties) != 13:
             print "ERROR: report format illegal. property count not equal to 13"
+            exit(0)
         for i in range(11):
             span = properties[i].xpath(".//span")
             successTask.data[SuccessMap[i]] = ""
@@ -113,7 +114,6 @@ def extractJobSetFromReport(reportPath):
                 successTask.data[SuccessMap[i]] = href[0]
 
         jobSet.tasks.append(successTask)
-    """
 
     # For failureArea
     failureTasks = failureArea.xpath("./td/table/tr")[2:]
@@ -122,6 +122,7 @@ def extractJobSetFromReport(reportPath):
         properties = task.xpath("./td")
         if len(properties) != 11 and len(properties) != 1:
             print "ERROR: report format illegal. failure property count not equal to 11 or 1"
+            exit(0)
         if len(properties) == 11:
             if failureTask:
                 jobSet.tasks.append(failureTask)
@@ -150,6 +151,6 @@ def extractJobSetFromReport(reportPath):
     return jobSet
 
 if __name__ == "__main__":
-    name = "Buildout_Report_20160731_140736.htm"
+    name = "../migration/Buildout_Report_20160731_140736.htm"
     jobSet = extractJobSetFromReport(name)
     print jobSet
